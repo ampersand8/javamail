@@ -8,6 +8,8 @@ import javax.swing.table.*;
 import java.awt.event.*;
 import java.io.IOException;
 import javax.swing.tree.*;
+import java.util.Properties;
+import java.io.*;
 
 /**
  * Beispielklasse einer sehr einfachen ersten Swing-Applikation.
@@ -138,6 +140,23 @@ public class FirstSwingExampleImproved extends WindowAdapter {
             }
         });
         return tree;
+    }
+
+    public String[] getProperty(String propFileName) throws IOException {
+        Properties prop = new Properties();
+
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
+
+        if (inputStream != null) {
+            prop.load(inputStream);
+        } else {
+            throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+        }
+
+    }
+
+    public void fetch_mail() {
+
     }
 }
 
