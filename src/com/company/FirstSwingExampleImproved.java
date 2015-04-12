@@ -70,7 +70,7 @@ public class FirstSwingExampleImproved extends WindowAdapter {
 
     private static JPanel createToolBarPanel() {
         final JToolBar zoomToolBar = new JToolBar();
-        zoomToolBar.add(new JButton("+"));
+        zoomToolBar.add(new JButton("Fetch"));
         zoomToolBar.add(new JButton("-"));
         zoomToolBar.addSeparator();
         zoomToolBar.add(new JButton("100%"));
