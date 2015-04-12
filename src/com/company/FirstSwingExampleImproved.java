@@ -1,11 +1,13 @@
 package com.company;
 
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.table.*;
+import java.awt.event.*;
+import java.io.IOException;
+import javax.swing.tree.*;
 
 /**
  * Beispielklasse einer sehr einfachen ersten Swing-Applikation.
@@ -22,6 +24,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 public class FirstSwingExampleImproved extends WindowAdapter {
     private final JFrame frame;
     private JTree tree;
+    private TableModel model;
+    private JTable mailTable;
+    private Object[] columnNames;
 
     public FirstSwingExampleImproved(JFrame frame) {
         this.frame = frame;
@@ -41,11 +46,26 @@ public class FirstSwingExampleImproved extends WindowAdapter {
     private JScrollPane createMailTable() {
 /*        Object rowData[][] = {{"Row1-Column1", "Row1-Column2", "Row1-Column3"},
                 {"Row2-Column1", "Row2-Column2", "Row2-Column3"}}; */
-        Object rowData[][] = getlocalmails("inbox");
-        Object columnNames[] = { "Subject" };
-        JTable mailTable = new JTable(rowData, columnNames);
+        try {
+            Object rowData[][] = getlocalmails("inbox");
+            this.columnNames = new Object[]{ "Subject" };
+            this.mailTable = new JTable(rowData, this.columnNames);
+            return new JScrollPane(this.mailTable);
+        } catch (IOException e) {
 
-        return new JScrollPane(mailTable);
+        }
+        return null;
+    }
+
+    private void updateMailTable(String folder) {
+        try {
+            Object rowData[][] = getlocalmails(folder);
+            DefaultTableModel newmodel = new DefaultTableModel(rowData,this.columnNames);
+            this.mailTable.setModel(newmodel);
+            newmodel.fireTableDataChanged();
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null,e.getMessage());
+        }
     }
 
     private static JPanel createToolBarPanel() {
@@ -68,12 +88,18 @@ public class FirstSwingExampleImproved extends WindowAdapter {
         return toolbarPanel;
     }
 
-    private String[][] getlocalmails(String folder) {
+    private String[][] getlocalmails(String folder) throws IOException {
         File directory = new File(folder);
-        File[] listofmails = directory.listFiles();
         String[][] out = new String[10][1];
-        for (int i = 0; i < listofmails.length; i++) {
-            out[i][0] = listofmails[i].getName();
+        if (directory.exists() && directory.isDirectory()) {
+           File[] listofmails = directory.listFiles();
+
+            for (int i = 0; i < listofmails.length; i++) {
+                out[i][0] = listofmails[i].getName();
+            }
+        }
+        else {
+            throw new IOException("Folder "+folder+" does not exist");
         }
         return out;
     }
@@ -98,6 +124,19 @@ public class FirstSwingExampleImproved extends WindowAdapter {
         root.add(outbox);
 
         tree = new JTree(root);
+        tree.addMouseListener(new MouseAdapter() {
+            public void mouseReleased(MouseEvent e) {
+                try {
+                    String selPath = tree.getPathForLocation(e.getX(), e.getY()).getLastPathComponent().toString().toLowerCase();
+                    if (selPath != null) {
+                        updateMailTable(selPath);
+                    }
+                }
+                catch (NullPointerException err) {
+
+                }
+            }
+        });
         return tree;
     }
 }
