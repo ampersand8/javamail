@@ -1,38 +1,31 @@
 package com.company;
 
 import java.awt.*;
-import java.io.File;
+import java.io.*;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.table.*;
 import java.awt.event.*;
-import java.io.IOException;
-import javax.swing.tree.*;
-import java.util.Properties;
-import java.io.*;
+import javax.mail.*;
+import javax.mail.internet.*;
+import java.util.*;
 
 /**
- * Beispielklasse einer sehr einfachen ersten Swing-Applikation.
- * Hier werden beide Bedienelemente dargestellt.
- * <br>
- * <b>Neu in Auflage 2</b>
- *
- * @author Michael Inden
- *
- * Copyright 2012 by Michael Inden
+ * Just a first try at a simple Mailclient, nothing serious
+ * @author simon
  */
 
 
-public class FirstSwingExampleImproved extends WindowAdapter {
+public class Javamail extends WindowAdapter {
     private final JFrame frame;
     private JTree tree;
     private TableModel model;
     private JTable mailTable;
     private Object[] columnNames;
+    private final String PROPFILENAME = "/home/simon/IdeaProjects/test01/resources/config.properties";
 
-    public FirstSwingExampleImproved(JFrame frame) {
+    public Javamail(JFrame frame) {
         this.frame = frame;
-
 
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
@@ -70,9 +63,11 @@ public class FirstSwingExampleImproved extends WindowAdapter {
         }
     }
 
-    private static JPanel createToolBarPanel() {
+    private JPanel createToolBarPanel() {
         final JToolBar zoomToolBar = new JToolBar();
-        zoomToolBar.add(new JButton("Fetch"));
+        JButton fetchbutton = new JButton("Fetch");
+        fetchbutton.addActionListener(new MyListener(this));
+        zoomToolBar.add(fetchbutton);
         zoomToolBar.add(new JButton("-"));
         zoomToolBar.addSeparator();
         zoomToolBar.add(new JButton("100%"));
@@ -142,21 +137,86 @@ public class FirstSwingExampleImproved extends WindowAdapter {
         return tree;
     }
 
-    public String[] getProperty(String propFileName) throws IOException {
+    public String getProperty(String property) throws IOException {
         Properties prop = new Properties();
 
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
+        InputStream inputStream = new FileInputStream(PROPFILENAME);
 
         if (inputStream != null) {
             prop.load(inputStream);
         } else {
-            throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+            throw new FileNotFoundException("property file '" + PROPFILENAME + "' not found in the classpath");
         }
-
+        return prop.getProperty(property);
     }
 
     public void fetch_mail() {
+        Properties properties = System.getProperties();
+        properties.put("mail.store.protocol","pop3s");
+        javax.mail.Session session = javax.mail.Session.getDefaultInstance(properties);
 
+        try {
+            javax.mail.Store store = session.getStore();
+            store.connect(getProperty("host"), getProperty("user"), getProperty("password"));
+            Folder folder = store.getFolder("Inbox");
+            folder.open(Folder.READ_WRITE);
+            Message[] messages = folder.getMessages();
+
+            for (int i = 0; i < messages.length; i++) {
+                Message msg = messages[i];
+                saveMessageToFile(msg);
+
+                String from = InternetAddress.toString(msg.getFrom());
+                if (from != null) {
+                    System.out.println("From: " + from);
+                }
+
+                String to = InternetAddress.toString(msg.getRecipients(Message.RecipientType.TO));
+                if (to != null) {
+                    System.out.println("To: " + to);
+                }
+
+                String subject = msg.getSubject();
+                if (subject != null) {
+                    System.out.println("Subject: " + subject);
+                }
+
+                Date sent = msg.getSentDate();
+                if (sent != null) {
+                    System.out.println("Sent: " + sent);
+                }
+
+                // Empty line to separate header from body
+                System.out.println();
+
+                // This could lead to troubles if anything but text was sent
+                System.out.println(msg.getContent());
+
+            /* In der endgueltigen Version sollen die Mails geloest werden */
+
+                // Mark this message for deletion when the session is closed
+                // msg.setFlag( Flags.Flag.DELETED, true ) ;
+            }
+
+            folder.close(true);
+            store.close();
+        }
+        catch(MessagingException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void saveMessageToFile(Message msg) {
+        Calendar calendar = Calendar.getInstance();
+        long timeinmillis = calendar.getTimeInMillis();
+        String filename = Long.toString(timeinmillis);
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream("inbox/"+filename), "utf-8"))) {
+            writer.write("From: " + InternetAddress.toString(msg.getRecipients(Message.RecipientType.TO)) + "\nTO: " + InternetAddress.toString(msg.getFrom()) + "\nSubject: " + msg.getSubject() + "\n" + msg.getContent());
+        }
+        catch(MessagingException | IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 

@@ -25,8 +25,8 @@ public class ReceiveMail
       String host = "pop.gmail.com" ;
 
       // Username and password
-      String user     = "-----@gmail.com" ;
-      String password = "-----" ;
+      String user     = "b.simonpeter90@gmail.com" ;
+      String password = "infantryman32" ;
 
       // Get system properties
       Properties properties = System.getProperties() ;
@@ -46,26 +46,24 @@ public class ReceiveMail
          store.connect( host, user, password ) ;
 
          // Create a Folder object corresponding to the given name
-         Folder folder = store.getFolder( "inbox" ) ;
+         Folder folder = store.getFolder( "Inbox" ) ;
 
          // Open the Folder
-         folder.open( Folder.READ_WRITE ) ;
+         folder.open(Folder.READ_WRITE);
 
          // Get the messages from the server
          Message[] messages = folder.getMessages();
 
          // Display message
-         for( int i = 0; i < messages.length; i++ )
-         {
-            Message msg = messages[i] ;
+         for(int i = 0; i < messages.length; i++) {
+            Message msg = messages[i];
 
-            String from = InternetAddress.toString( msg.getFrom() ) ;
-            if( from != null )
-            {
-               System.out.println( "From: " + from ) ;
+            String from = InternetAddress.toString(msg.getFrom());
+            if( from != null ) {
+               System.out.println("From: " + from);
             }
 
-            String to = InternetAddress.toString( msg.getRecipients(Message.RecipientType.TO) ) ;
+            String to = InternetAddress.toString(msg.getRecipients(Message.RecipientType.TO));
             if( to != null )
 	    {
                System.out.println( "To: " + to ) ;
@@ -87,7 +85,7 @@ public class ReceiveMail
             System.out.println() ;
 
             // This could lead to troubles if anything but text was sent
-            System.out.println( msg.getContent() ) ;
+            System.out.println(msg.getContent()) ;
 
             /* In der endgueltigen Version sollen die Mails geloest werden */
 

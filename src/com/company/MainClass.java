@@ -10,6 +10,6 @@ public class MainClass {
     private static final JFrame frame = new JFrame("xMail");
 
     public static void main(String[] args) {
-        frame.addWindowListener(new FirstSwingExampleImproved(frame));
+        frame.addWindowListener(new Javamail(frame));
     }
 }
