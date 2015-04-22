@@ -22,7 +22,7 @@ public class Javamail extends WindowAdapter {
     private TableModel model;
     private JTable mailTable;
     private Object[] columnNames;
-    private final String PROPFILENAME = "/home/simon/IdeaProjects/test01/resources/config.properties";
+    private final String PROPFILENAME = "resources/config.properties";
 
     public Javamail(JFrame frame) {
         this.frame = frame;
@@ -47,7 +47,7 @@ public class Javamail extends WindowAdapter {
             this.mailTable = new JTable(rowData, this.columnNames);
             return new JScrollPane(this.mailTable);
         } catch (IOException e) {
-
+          JOptionPane.showMessageDialog(null,e.getMessage());
         }
         return null;
     }
