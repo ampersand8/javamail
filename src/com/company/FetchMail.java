@@ -7,7 +7,6 @@ import javax.mail.internet.InternetAddress;
 import java.io.*;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Map;
 import java.util.Properties;
 
 /**

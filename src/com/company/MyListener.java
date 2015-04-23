@@ -6,9 +6,9 @@ import java.awt.event.*;
  * Created by simon on 4/15/15.
  */
 public class MyListener implements ActionListener {
-    Javamail mymail;
+    JavaMail mymail;
 
-    MyListener(Javamail mymail) {
+    MyListener(JavaMail mymail) {
         this.mymail = mymail;
     }
 

@@ -14,7 +14,7 @@ import java.util.*;
  */
 
 
-public class Javamail extends WindowAdapter {
+public class JavaMail extends WindowAdapter {
     private final JFrame frame;
     private JTree tree;
     private TableModel model;
@@ -22,7 +22,7 @@ public class Javamail extends WindowAdapter {
     private Object[] columnNames;
     private final String PROPFILENAME = "resources/config.properties";
 
-    public Javamail(JFrame frame) {
+    public JavaMail(JFrame frame) {
         this.frame = frame;
 
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
