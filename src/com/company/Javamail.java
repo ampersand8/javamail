@@ -6,8 +6,6 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.table.*;
 import java.awt.event.*;
-import javax.mail.*;
-import javax.mail.internet.*;
 import java.util.*;
 
 /**
@@ -29,7 +27,7 @@ public class Javamail extends WindowAdapter {
 
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-        // JLabel bzw. JButton mit Positionierungsangaben zum JFrame hinzuf�gen
+        // JLabel bzw. JButton mit Positionierungsangaben zum JFrame hinzufuegen
         frame.add(TreeExample(), BorderLayout.WEST);
         frame.add(createMailTable(), BorderLayout.CENTER);
         frame.add(createToolBarPanel(), BorderLayout.NORTH);
@@ -42,7 +40,7 @@ public class Javamail extends WindowAdapter {
 /*        Object rowData[][] = {{"Row1-Column1", "Row1-Column2", "Row1-Column3"},
                 {"Row2-Column1", "Row2-Column2", "Row2-Column3"}}; */
         try {
-            Object rowData[][] = getlocalmails("inbox");
+            Object rowData[][] = getLocalMails("inbox");
             this.columnNames = new Object[]{ "Subject" };
             this.mailTable = new JTable(rowData, this.columnNames);
             return new JScrollPane(this.mailTable);
@@ -54,7 +52,7 @@ public class Javamail extends WindowAdapter {
 
     private void updateMailTable(String folder) {
         try {
-            Object rowData[][] = getlocalmails(folder);
+            Object rowData[][] = getLocalMails(folder);
             DefaultTableModel newmodel = new DefaultTableModel(rowData,this.columnNames);
             this.mailTable.setModel(newmodel);
             newmodel.fireTableDataChanged();
@@ -85,7 +83,7 @@ public class Javamail extends WindowAdapter {
         return toolbarPanel;
     }
 
-    private String[][] getlocalmails(String folder) throws IOException {
+    private String[][] getLocalMails(String folder) throws IOException {
         File directory = new File(folder);
         String[][] out = new String[10][1];
         if (directory.exists() && directory.isDirectory()) {
@@ -137,7 +135,7 @@ public class Javamail extends WindowAdapter {
         return tree;
     }
 
-    public String getProperty(String property) throws IOException {
+    private Properties getProperties() throws IOException {
         Properties prop = new Properties();
 
         InputStream inputStream = new FileInputStream(PROPFILENAME);
@@ -147,75 +145,15 @@ public class Javamail extends WindowAdapter {
         } else {
             throw new FileNotFoundException("property file '" + PROPFILENAME + "' not found in the classpath");
         }
-        return prop.getProperty(property);
+        return prop;
     }
 
-    public void fetch_mail() {
-        Properties properties = System.getProperties();
-        properties.put("mail.store.protocol","pop3s");
-        javax.mail.Session session = javax.mail.Session.getDefaultInstance(properties);
-
+    public void fetchMail() {
         try {
-            javax.mail.Store store = session.getStore();
-            store.connect(getProperty("host"), getProperty("user"), getProperty("password"));
-            Folder folder = store.getFolder("Inbox");
-            folder.open(Folder.READ_WRITE);
-            Message[] messages = folder.getMessages();
-
-            for (int i = 0; i < messages.length; i++) {
-                Message msg = messages[i];
-                saveMessageToFile(msg);
-
-                String from = InternetAddress.toString(msg.getFrom());
-                if (from != null) {
-                    System.out.println("From: " + from);
-                }
-
-                String to = InternetAddress.toString(msg.getRecipients(Message.RecipientType.TO));
-                if (to != null) {
-                    System.out.println("To: " + to);
-                }
-
-                String subject = msg.getSubject();
-                if (subject != null) {
-                    System.out.println("Subject: " + subject);
-                }
-
-                Date sent = msg.getSentDate();
-                if (sent != null) {
-                    System.out.println("Sent: " + sent);
-                }
-
-                // Empty line to separate header from body
-                System.out.println();
-
-                // This could lead to troubles if anything but text was sent
-                System.out.println(msg.getContent());
-
-            /* In der endgueltigen Version sollen die Mails geloest werden */
-
-                // Mark this message for deletion when the session is closed
-                // msg.setFlag( Flags.Flag.DELETED, true ) ;
-            }
-
-            folder.close(true);
-            store.close();
-        }
-        catch(MessagingException | IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void saveMessageToFile(Message msg) {
-        Calendar calendar = Calendar.getInstance();
-        long timeinmillis = calendar.getTimeInMillis();
-        String filename = Long.toString(timeinmillis);
-        try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream("inbox/"+filename), "utf-8"))) {
-            writer.write("From: " + InternetAddress.toString(msg.getRecipients(Message.RecipientType.TO)) + "\nTO: " + InternetAddress.toString(msg.getFrom()) + "\nSubject: " + msg.getSubject() + "\n" + msg.getContent());
-        }
-        catch(MessagingException | IOException e) {
-            e.printStackTrace();
+            Properties props = getProperties();
+            (new Thread(new FetchMail(props))).start();
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null,e.getMessage());
         }
     }
 }

@@ -13,6 +13,6 @@ public class MyListener implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        mymail.fetch_mail();
+        mymail.fetchMail();
     }
 }
