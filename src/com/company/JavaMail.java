@@ -28,7 +28,7 @@ public class JavaMail extends WindowAdapter {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         // JLabel bzw. JButton mit Positionierungsangaben zum JFrame hinzufuegen
-        frame.add(TreeExample(), BorderLayout.WEST);
+        frame.add(createTreeStructure(), BorderLayout.WEST);
         frame.add(createMailTable(), BorderLayout.CENTER);
         frame.add(createToolBarPanel(), BorderLayout.NORTH);
 
@@ -37,8 +37,6 @@ public class JavaMail extends WindowAdapter {
     }
 
     private JScrollPane createMailTable() {
-/*        Object rowData[][] = {{"Row1-Column1", "Row1-Column2", "Row1-Column3"},
-                {"Row2-Column1", "Row2-Column2", "Row2-Column3"}}; */
         try {
             Object rowData[][] = getLocalMails("inbox");
             this.columnNames = new Object[]{ "Subject" };
@@ -63,10 +61,18 @@ public class JavaMail extends WindowAdapter {
 
     private JPanel createToolBarPanel() {
         final JToolBar zoomToolBar = new JToolBar();
-        JButton fetchbutton = new JButton("Fetch");
-        fetchbutton.addActionListener(new MyListener(this));
-        zoomToolBar.add(fetchbutton);
-        zoomToolBar.add(new JButton("-"));
+        JButton fetchButton = new JButton("Fetch");
+        fetchButton.addActionListener(new MyListener(this));
+
+        JButton sendButton = new JButton("Write");
+        sendButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                createMail();
+            }
+        });
+
+        zoomToolBar.add(fetchButton);
+        zoomToolBar.add(sendButton);
         zoomToolBar.addSeparator();
         zoomToolBar.add(new JButton("100%"));
 
@@ -110,7 +116,7 @@ public class JavaMail extends WindowAdapter {
         }
     }
 
-    public JTree TreeExample() {
+    private JTree createTreeStructure() {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
         DefaultMutableTreeNode inbox = new DefaultMutableTreeNode("Inbox");
         DefaultMutableTreeNode outbox = new DefaultMutableTreeNode("Outbox");
@@ -146,6 +152,10 @@ public class JavaMail extends WindowAdapter {
             throw new FileNotFoundException("property file '" + PROPFILENAME + "' not found in the classpath");
         }
         return prop;
+    }
+
+    public void createMail() {
+        new CreateMail();
     }
 
     public void fetchMail() {

@@ -1,5 +1,6 @@
 package com.company;
 
+import javax.swing.*;
 import java.awt.event.*;
 
 /**
@@ -13,6 +14,9 @@ public class MyListener implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        mymail.fetchMail();
+        JButton button = (JButton) e.getSource();
+        if (button.getText().equals("Fetch")) {
+            mymail.fetchMail();
+        }
     }
 }
